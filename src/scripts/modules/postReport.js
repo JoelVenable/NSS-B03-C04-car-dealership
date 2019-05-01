@@ -9,4 +9,4 @@ module.exports.postReport = function (report) {
   <p>Most popular model: ${report.popularModel}</p>
   <p>Bank with most loans: ${report.popularBank}</p>
   `;
-}
+};

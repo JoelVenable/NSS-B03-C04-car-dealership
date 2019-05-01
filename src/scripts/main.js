@@ -13,11 +13,11 @@ API.getLocalData("dealership")
   .then(sales => {
     let sales2017 = sales.filter(sale => sale.purchase_date.slice(0, 4) === "2017");
     let report = {
-      totalProfit: getData.getTotalProfit(sales2017)
-      //bestMonth: getBestMonth(sales2017),
+      totalProfit: getData.getTotalProfit(sales2017),
+      bestMonth: getData.getBestMonth(sales2017)
       //mostSales: getMostSales(sales2017)
     };
-    postReportToDOM(report);
+    postReport(report);
   });
 
 // function numToLongMonth(monthNum) {
@@ -29,28 +29,6 @@ API.getLocalData("dealership")
 
 
 
-// function getBestMonth(sales) {
-//   let saleMonths = sales.map(sale => parseInt(sale.purchase_date.slice(5, 7)));
-//   let months = [];
-//   for (let i = 0; i < 12; i++) {
-//     months[i] = {
-//       month: i + 1,
-//       sales: saleMonths.filter(saleMonth => saleMonth === `${i + 1}`).length
-//     };
-//   }
-//   console.log(months);
-//   let mostSales = Math.max(...months.map(month => month.sales));
-//   let bestMonth = months.filter(month => month.sales === mostSales);
-//   console.log(bestMonth);
-//   numToLongMonth(bestMonth.month);
-//   return bestMonth;
-
-// }
-
-
-// function makeSaleDateArray(sales) {
-//   return sales.map(sale => new Date(sale.purchase_date));
-// }
 
 // function getMostSales(sales) {
 //   let saleDates = makeSaleDateArray(sales);
