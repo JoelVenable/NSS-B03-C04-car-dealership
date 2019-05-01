@@ -2,23 +2,12 @@ import {
   API
 } from "./modules/API.js";
 import {
-  getData
-} from "./modules/getData";
-import {
-  postReport
-} from "./modules/postReport";
+  handleSales
+} from "./modules/handleSales";
 
 
 API.getLocalData("dealership")
-  .then(sales => {
-    let sales2017 = sales.filter(sale => sale.purchase_date.slice(0, 4) === "2017");
-    let report = {
-      totalProfit: getData.getTotalProfit(sales2017),
-      bestMonth: getData.getBestMonth(sales2017),
-      mostSales: getData.getMostSales(sales2017)
-    };
-    postReport(report);
-  });
+  .then(handleSales);
 
 // function numToLongMonth(monthNum) {
 //   let monthDate = new Date(`2017-${monthNum}-01`);

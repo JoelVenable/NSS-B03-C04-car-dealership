@@ -1,35 +1,51 @@
-module.exports.getData = {
-  getTotalProfit: function (sales) {
-    return sales.reduce(
-      ((totalProfit, currentSale) => totalProfit += parseFloat(currentSale.gross_profit)), 0
-    ).toFixed(2);
-  },
-  getBestMonth: function (sales) {
-    let saleDates = sales.map(sale => new Date(sale.purchase_date).toLocaleString("en-US", {
-      month: "short"
-    }));
-    let bestMonth = 0;
-    let monthSales = buildIteratorObject(saleDates);
-    for (const month in monthSales) {
-      if (monthSales.hasOwnProperty(month)) {
-        bestMonth = Math.max(bestMonth, monthSales[month]);
-      }
+function getMostSales(sales, objectKeyToCheck) {
+  let salesTally = buildSalesPersonArray(sales);
+  let bestSales = salesTally.reduce((bestPerson, currentPerson) => {
+    if (bestPerson === 0) {
+      return currentPerson;
+    } else if (currentPerson[objectKeyToCheck] > bestPerson[objectKeyToCheck]) {
+      return currentPerson;
+    } else if (bestPerson[objectKeyToCheck] > currentPerson[objectKeyToCheck]) {
+      return bestPerson;
+    } else {
+      bestPerson.name.push(currentPerson.name[0]);
+      return bestPerson;
     }
-    let bestMonths = [];
-    for (const month in monthSales) {
-      if (monthSales.hasOwnProperty(month) && monthSales[month] === bestMonth) {
-        bestMonths.push(month);
-      }
-    }
-    return bestMonths;
-  },
-  getMostSales: function (sales) {
-    let salesTally = buildSalesPersonArray(sales);
+  }, 0);
+  return bestSales.name;
+}
 
-    console.log(salesTally);
+function getTotalProfit(sales) {
+  return sales.reduce(
+    ((totalProfit, currentSale) => totalProfit += parseFloat(currentSale.gross_profit)), 0
+  ).toFixed(2);
+}
+
+function getBestMonth(sales) {
+  let saleDates = sales.map(sale => new Date(sale.purchase_date).toLocaleString("en-US", {
+    month: "short"
+  }));
+
+  let monthSales = buildIteratorObject(saleDates);
+  return getMostCommon(monthSales);
+
+}
+
+function getMostCommon(objectOfThingsWithCounts) {
+  let mostFrequent = 0;
+  for (const thing in objectOfThingsWithCounts) {
+    if (objectOfThingsWithCounts.hasOwnProperty(thing)) {
+      mostFrequent = Math.max(mostFrequent, objectOfThingsWithCounts[thing]);
+    }
   }
-};
-
+  let itemsWithMost = [];
+  for (const thing in objectOfThingsWithCounts) {
+    if (objectOfThingsWithCounts.hasOwnProperty(thing) && objectOfThingsWithCounts[thing] === mostFrequent) {
+      itemsWithMost.push(thing);
+    }
+  }
+  return itemsWithMost;
+}
 
 
 function buildIteratorObject(sales) {
@@ -46,32 +62,49 @@ function buildIteratorObject(sales) {
 }
 
 
+function getMostPopularModel(sales) {
+  let modelArray = buildIteratorObject(sales.map(sale => sale.vehicle.model));
+  return getMostCommon(modelArray);
+}
+
+function getMostCommonBank(sales) {
+  let bankArray = buildIteratorObject(sales.map(sale => sale.credit.credit_provider));
+  return getMostCommon(bankArray);
+}
 
 function buildSalesPersonArray(sales) {
   let salesPeople = sales.map(sale => {
     return {
-      name: `${sale.sales_agent.first_name} ${sale.sales_agent.last_name}`,
+      name: [`${sale.sales_agent.first_name} ${sale.sales_agent.last_name}`],
       profit: sale.gross_profit
-    }
+    };
   });
   return salesPeople.reduce((people, currentSale) => {
     //  return array of objects containing each salesperson, their total sales, and gross profits.
 
     let personIndex = people.findIndex(person => {
-      return person.name === currentSale.name;
+      return person.name[0] === currentSale.name[0];
     });
 
     if (personIndex === -1) {
       // new person in array
-      currentSale.count = 1
+      currentSale.count = 1;
       people.push(currentSale);
     } else {
       // person already sold a car!
       people[personIndex].count++;
       people[personIndex].profit += currentSale.profit;
     }
-    console.log(people);
     return people;
   }, []);
 
 }
+
+
+module.exports.getData = {
+  getTotalProfit: getTotalProfit,
+  getBestMonth: getBestMonth,
+  getMostSales: getMostSales,
+  getMostPopularModel: getMostPopularModel,
+  getMostCommonBank: getMostCommonBank
+};
