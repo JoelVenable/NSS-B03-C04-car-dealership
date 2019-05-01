@@ -5,50 +5,73 @@ module.exports.getData = {
     ).toFixed(2);
   },
   getBestMonth: function (sales) {
-    let monthArray = buildMonthArray(sales);
-
-    let mostSales = Math.max(...monthArray.map(month => month.count));
-    return monthArray
-      .filter(month => month.count === mostSales)
-      .map(month => month.month);
+    let saleDates = sales.map(sale => new Date(sale.purchase_date).toLocaleString("en-US", {
+      month: "short"
+    }));
+    let bestMonth = 0;
+    let monthSales = buildIteratorObject(saleDates);
+    for (const month in monthSales) {
+      if (monthSales.hasOwnProperty(month)) {
+        bestMonth = Math.max(bestMonth, monthSales[month]);
+      }
+    }
+    let bestMonths = [];
+    for (const month in monthSales) {
+      if (monthSales.hasOwnProperty(month) && monthSales[month] === bestMonth) {
+        bestMonths.push(month);
+      }
+    }
+    return bestMonths;
   },
   getMostSales: function (sales) {
-    let salesPerson = sales.map(
-      sale => `${sale.sales_agent.first_name} ${sale.sales_agent.last_name}`
-    );
+    let salesTally = buildSalesPersonArray(sales);
 
-    console.log(salesPerson);
+    console.log(salesTally);
   }
 };
 
 
 
-
-
-function buildMonthArray(sales) {
-  let saleDates = sales.map(sale => new Date(sale.purchase_date));
-  return saleDates.reduce((months, saleDate) => {
+function buildIteratorObject(sales) {
+  return sales.reduce((accumulatorObject, currentItem) => {
     //  return array of objects with each month being an object
-    let saleMonth = saleDate.toLocaleString("en-US", {
-      month: "short"
-    });
-    let monthNum;
-    if (months.length > 0) {
-      monthNum = months.findIndex(month => {
-        return month.month === saleMonth;
-      });
-    } else monthNum = -1;
-    if (monthNum === -1) {
-      // new month in array
-      months.push({
-        month: saleMonth,
-        count: 1
-      });
+    if (!accumulatorObject[currentItem]) {
+      accumulatorObject[currentItem] = 1;
     } else {
-      // month exists!
-      months[monthNum].count++;
+      accumulatorObject[currentItem]++;
     }
-    return months;
+    return accumulatorObject;
+  }, {});
+
+}
+
+
+
+function buildSalesPersonArray(sales) {
+  let salesPeople = sales.map(sale => {
+    return {
+      name: `${sale.sales_agent.first_name} ${sale.sales_agent.last_name}`,
+      profit: sale.gross_profit
+    }
+  });
+  return salesPeople.reduce((people, currentSale) => {
+    //  return array of objects containing each salesperson, their total sales, and gross profits.
+
+    let personIndex = people.findIndex(person => {
+      return person.name === currentSale.name;
+    });
+
+    if (personIndex === -1) {
+      // new person in array
+      currentSale.count = 1
+      people.push(currentSale);
+    } else {
+      // person already sold a car!
+      people[personIndex].count++;
+      people[personIndex].profit += currentSale.profit;
+    }
+    console.log(people);
+    return people;
   }, []);
 
 }
