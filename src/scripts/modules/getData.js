@@ -7,20 +7,18 @@ module.exports.getData = {
   getBestMonth: function (sales) {
     let monthArray = buildMonthArray(sales);
 
-    let mostSales = Math.max(...monthArray.map(month => month.sales));
-    let bestMonths = monthArray.filter(month => month.sales === mostSales);
-    let monthNames = ["January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    // numToLongMonth(bestMonth.month);
-    return bestMonths.map(month => monthNames[month.month - 1]);
-  }
-  // getMostSales: function (sales) {
-  //   console.log(sales);
-  //   let salesPerson = sales.map(sale => {
+    let mostSales = Math.max(...monthArray.map(month => month.count));
+    return monthArray
+      .filter(month => month.count === mostSales)
+      .map(month => month.month);
+  },
+  getMostSales: function (sales) {
+    let salesPerson = sales.map(
+      sale => `${sale.sales_agent.first_name} ${sale.sales_agent.last_name}`
+    );
 
-  //   })
-  // }
+    console.log(salesPerson);
+  }
 };
 
 
@@ -29,17 +27,28 @@ module.exports.getData = {
 
 function buildMonthArray(sales) {
   let saleDates = sales.map(sale => new Date(sale.purchase_date));
-  let months = [];
-  for (let i = 0; i < 12; i++) {
-    months[i] = {
-      month: i + 1,
-      sales: saleDates.filter(saleDate => {
-        let saleMonth = saleDate.toLocaleString("en-US", {
-          month: "numeric"
-        });
-        return parseInt(saleMonth) === i + 1;
-      }).length
-    };
-  }
-  return months;
+  return saleDates.reduce((months, saleDate) => {
+    //  return array of objects with each month being an object
+    let saleMonth = saleDate.toLocaleString("en-US", {
+      month: "short"
+    });
+    let monthNum;
+    if (months.length > 0) {
+      monthNum = months.findIndex(month => {
+        return month.month === saleMonth;
+      });
+    } else monthNum = -1;
+    if (monthNum === -1) {
+      // new month in array
+      months.push({
+        month: saleMonth,
+        count: 1
+      });
+    } else {
+      // month exists!
+      months[monthNum].count++;
+    }
+    return months;
+  }, []);
+
 }

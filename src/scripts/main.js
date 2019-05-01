@@ -14,8 +14,8 @@ API.getLocalData("dealership")
     let sales2017 = sales.filter(sale => sale.purchase_date.slice(0, 4) === "2017");
     let report = {
       totalProfit: getData.getTotalProfit(sales2017),
-      bestMonth: getData.getBestMonth(sales2017)
-      //mostSales: getMostSales(sales2017)
+      bestMonth: getData.getBestMonth(sales2017),
+      mostSales: getData.getMostSales(sales2017)
     };
     postReport(report);
   });
